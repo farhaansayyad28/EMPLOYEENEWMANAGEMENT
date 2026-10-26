@@ -1,0 +1,12 @@
+{
+  "name": "employee-management",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && cd server && npm install && cd .. && cd client && npm install",
+    "dev": "concurrently \"npm --prefix server run dev\" \"npm --prefix client run dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
