@@ -19,11 +19,11 @@ The directory includes search, department and status filters, sorting, paginatio
 
 ## Management modules
 
-- **Overview:** headcount, active employees, employees on leave, new hires, recent team members, and department distribution.
+- **Overview:** headcount, active employees, employees on leave, new hires, today's attendance totals, pending leave requests, department distribution, and recently updated employee records.
 - **People → Employee directory:** employee profiles, add/edit/delete, search, filters, sorting, and pagination.
 - **People → Departments:** create teams, add descriptions, review department headcount, and remove empty departments.
-- **Time & leave → Attendance:** record each active employee as present, late, absent, or working from home for a selected date. Daily registers are saved in MongoDB.
-- **Time & leave → Leave requests:** submit time-off requests and approve or decline pending requests.
+- **Time & leave → Attendance:** record each active employee as present, late, absent, or working from home for a selected date; review historical totals over a date range. Daily registers are saved in MongoDB.
+- **Time & leave → Leave requests:** submit time-off requests, approve or decline pending requests, and see approved leave on a monthly calendar. Overlapping pending or approved requests for the same employee are blocked.
 - **Reports:** employee CSV export and a workforce summary. The SOAP XML example remains available as a separate API learning demo.
 
 ## Requirements
@@ -120,6 +120,7 @@ The API runs at `http://localhost:5000`. Check `http://localhost:5000/api/health
 | GET, POST | `/api/departments` | List departments or add a department |
 | PUT, DELETE | `/api/departments/:id` | Edit or delete an empty department |
 | GET | `/api/attendance?date=YYYY-MM-DD` | View the daily attendance register |
+| GET | `/api/attendance/history?from=YYYY-MM-DD&to=YYYY-MM-DD` | Review attendance records for a date range |
 | PUT | `/api/attendance/day` | Save the selected day's attendance records |
 | GET, POST | `/api/leave-requests` | List leave requests or create one |
 | PATCH | `/api/leave-requests/:id/status` | Approve or decline a request |
@@ -163,15 +164,16 @@ The app's regular modules use REST/JSON. The SOAP button is a separate compariso
 3. Check that the employee appears and the dashboard counts update.
 4. Search, filter by department or status, sort the directory, and move between pages.
 5. Open the employee profile, edit details, and try the row menu to change status.
-6. Add a department, then open **Attendance**, mark the team, and save the daily register.
-7. Create a leave request and approve or decline it from the request list.
-8. Open **Reports** to export the employee CSV and view the workforce summary; run the SOAP demo if required for class.
-9. Delete a test employee and confirm the row disappears.
-10. Sign out and sign back in; employee and module data should still be saved.
+6. Add a department, then open **Attendance**, mark the team, and save the daily register. Switch to history and review a date range.
+7. Create a leave request, approve it, and confirm it appears on the monthly leave calendar. Try an overlapping request to see the validation.
+8. Return to **Overview** and review today’s attendance and pending leave summaries.
+9. Open **Reports** to export the employee CSV and view the workforce summary; run the SOAP demo if required for class.
+10. Delete a test employee and confirm the row disappears.
+11. Sign out and sign back in; employee and module data should still be saved.
 
 ## Viva explanation
 
-“This is a PeopleDesk HR management system built with the MERN stack. React provides the interface and Axios sends requests to an Express API running on Node.js. Mongoose stores employees, departments, attendance, and leave requests in MongoDB. I implemented employee CRUD, department management, daily attendance, leave approvals, search, filters, sorting, pagination, employee profiles, and CSV reports. Accounts use bcrypt-hashed passwords and JWT-protected API routes. The everyday modules use REST/JSON; a separate SOAP XML demo shows the difference between the two API styles.”
+“This is a PeopleDesk HR management system built with the MERN stack. React provides the interface and Axios sends requests to an Express API running on Node.js. Mongoose stores employees, departments, attendance, and leave requests in MongoDB. I implemented employee CRUD, department management, daily and historical attendance, leave approvals with overlap validation, a monthly leave calendar, search, filters, sorting, pagination, employee profiles, and a live operations dashboard. Accounts use bcrypt-hashed passwords and JWT-protected API routes. The everyday modules use REST/JSON; a separate SOAP XML demo shows the difference between the two API styles.”
 
 ### Short theory answers to prepare
 

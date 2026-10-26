@@ -9,6 +9,14 @@ router.use(authenticate);
 const validDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value || '') && !Number.isNaN(Date.parse(`${value}T00:00:00.000Z`));
 const statuses = new Set(['Present', 'Late', 'Absent', 'Work from home', 'Not marked']);
 
+router.get('/history', async (req, res, next) => {
+  try {
+    const { from, to } = req.query;
+    if (!validDate(from) || !validDate(to) || from > to) return res.status(400).json({ message: 'Provide a valid date range in YYYY-MM-DD format.' });
+    res.json(await Attendance.find({ date: { $gte: from, $lte: to } }).populate('employeeId', 'name department role').sort({ date: -1, updatedAt: -1 }));
+  } catch (error) { next(error); }
+});
+
 router.get('/', async (req, res, next) => {
   try {
     const date = req.query.date;
