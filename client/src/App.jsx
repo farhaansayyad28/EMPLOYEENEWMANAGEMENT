@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Users, UserPlus, Search, Pencil, Trash2, X, Building2, UserRound, ChevronDown, MoreHorizontal, Download, FileCode2, Phone, MapPin, CalendarDays, ArrowUpDown, Mail, Clock3, UserCheck, UserX, LayoutDashboard, ClipboardCheck, Plane, ChartNoAxesCombined, Plus, Check, Ban, BriefcaseBusiness } from 'lucide-react';
 import AuthScreen from './AuthScreen.jsx';
 
+// Shared Axios client: sends the signed-in user's token to the Express API.
 const api = axios.create({ baseURL: 'http://localhost:5000/api' });
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('peopleDeskToken');
@@ -13,12 +14,14 @@ const blank = { name: '', email: '', department: '', role: '', phone: '', locati
 const colors = ['violet', 'blue', 'amber', 'rose', 'teal', 'orange'];
 const initials = (name) => name.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
 
+// Small statistic card used on the Overview page.
 function SummaryCard({ icon: Icon, tone, label, value }) {
   return <div className="stat-card"><div className={`stat-icon ${tone}`}><Icon size={18} /></div><div><span>{label}</span><strong>{value}</strong></div></div>;
 }
 
 const localToday = () => { const date = new Date(); date.setMinutes(date.getMinutes() - date.getTimezoneOffset()); return date.toISOString().slice(0, 10); };
 
+// Website: Time & leave → Attendance (daily register and history).
 function AttendanceModule({ employees, role }) {
   const canManage = role === 'Admin' || role === 'Manager';
   const [date, setDate] = useState(localToday());
@@ -67,6 +70,7 @@ function AttendanceModule({ employees, role }) {
   </section>;
 }
 
+// Website: Time & leave → Leave requests (submit, review, and calendar).
 function LeaveModule({ employees, role }) {
   const canReview = role === 'Admin' || role === 'Manager';
   const [requests, setRequests] = useState([]);
@@ -98,6 +102,7 @@ function LeaveModule({ employees, role }) {
     <section className="module-card leave-list-card"><div className="module-header compact"><div><div className="eyebrow">TIME OFF</div><h2>Leave management <span className="title-count">{requests.length}</span></h2><p>Review requests or see approved leave on the team calendar.</p></div><span className="pending-count"><Clock3 size={14} />{pending} pending</span></div><div className="leave-view-toggle"><button className={leaveView === 'requests' ? 'selected' : ''} onClick={() => setLeaveView('requests')}>Requests</button><button className={leaveView === 'calendar' ? 'selected' : ''} onClick={() => setLeaveView('calendar')}><CalendarDays size={14} />Leave calendar</button></div>{error && <div className="form-error module-message">{error}</div>}{loading ? <div className="module-empty">Loading requests…</div> : leaveView === 'requests' ? requests.length ? <div className="leave-request-list">{requests.map((request) => <article className="leave-request" key={request._id}><div className="leave-type-icon"><Plane size={17} /></div><div className="leave-info"><strong>{request.employeeId?.name || 'Unknown employee'}</strong><span>{request.type} · {new Date(request.startDate).toLocaleDateString()} – {new Date(request.endDate).toLocaleDateString()}</span>{request.reason && <small>{request.reason}</small>}</div><div className="leave-controls"><span className={`status-pill leave-${request.status.toLowerCase()}`}>{request.status}</span>{canReview && request.status === 'Pending' && <><button className="icon-action approve-action" title="Approve request" onClick={() => updateStatus(request, 'Approved')}><Check size={16} /></button><button className="icon-action decline-action" title="Decline request" onClick={() => updateStatus(request, 'Declined')}><Ban size={16} /></button></>}{(canReview || (role === 'Employee' && request.status === 'Pending')) && <button className="icon-action" title={role === 'Employee' ? 'Cancel request' : 'Delete request'} onClick={() => removeRequest(request)}><Trash2 size={15} /></button>}</div></article>)}</div> : <div className="module-empty"><Plane size={26} /><strong>No leave requests yet</strong><span>Requests you add will appear here for review.</span></div> : <div className="leave-calendar"><div className="calendar-month-controls"><button aria-label="Previous month" onClick={() => setCalendarMonth((month) => new Date(month.getFullYear(), month.getMonth() - 1, 1))}>‹</button><strong>{monthStart.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</strong><button aria-label="Next month" onClick={() => setCalendarMonth((month) => new Date(month.getFullYear(), month.getMonth() + 1, 1))}>›</button></div><div className="leave-calendar-grid calendar-weekdays">{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => <span key={day}>{day}</span>)}</div><div className="leave-calendar-grid">{calendarCells.map((day, index) => { const dateString = day ? `${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}` : ''; const dayLeaves = day ? approvedOnDate(dateString) : []; return <div className={`calendar-day ${day ? '' : 'outside-month'} ${dateString === localToday() ? 'today' : ''}`} key={`${dateString}-${index}`}>{day && <><span className="calendar-day-number">{day}</span>{dayLeaves.slice(0, 2).map((request) => <span className="calendar-leave-chip" key={request._id} title={`${request.employeeId?.name || 'Employee'} · ${request.type}`}>{request.employeeId?.name || 'Employee'}</span>)}{dayLeaves.length > 2 && <small className="calendar-more">+{dayLeaves.length - 2} more</small>}</>}</div>; })}</div><div className="calendar-footnote"><span><i className="legend-dot present-dot" />Approved leave</span><span>{approvedLeaves.length} approved request{approvedLeaves.length === 1 ? '' : 's'} on calendar</span></div>{!approvedLeaves.length && <p className="calendar-empty-note">Approved leave requests will appear on this calendar.</p>}</div>}</section></div>;
 }
 
+// Website: People → Departments (team cards and headcount).
 function DepartmentModule({ departments, employees, onReload, onSelectDepartment, canManage }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -109,6 +114,7 @@ function DepartmentModule({ departments, employees, onReload, onSelectDepartment
   return <div className={`department-layout ${canManage ? '' : 'read-only-departments'}`}>{canManage && <section className="module-card department-add-card"><div className="eyebrow">ORGANIZATION</div><h2>Departments</h2><p className="module-subtitle">Group employees into teams and see each department’s headcount.</p><form className="department-form" onSubmit={addDepartment}><label>Department name<input required maxLength="60" value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Customer Success" /></label><label>Description <span className="optional-label">(optional)</span><input maxLength="240" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="What this team does" /></label>{error && <div className="form-error">{error}</div>}<button className="primary-button" disabled={saving}><Plus size={15} />{saving ? 'Adding…' : 'Add department'}</button></form></section>}<section className="module-card department-directory"><div className="module-header compact"><div><div className="eyebrow">TEAMS</div><h2>Department directory <span className="title-count">{allDepartments.length}</span></h2><p>{canManage ? 'Departments containing employees can’t be deleted until they’re empty.' : 'Browse teams and their headcount.'}</p></div></div><div className="department-grid">{allDepartments.map((department, index) => { const team = employees.filter((employee) => employee.department === department.name); const active = team.filter((employee) => (employee.status || 'Active') === 'Active').length; return <article className="department-card" key={department._id}><div className={`department-icon tone-${index % 4}`}><Building2 size={18} /></div><div className="department-card-top"><h3>{department.name}</h3>{canManage && !department.legacy && <button className="icon-action" title="Delete department" onClick={() => deleteDepartment(department)}><Trash2 size={15} /></button>}</div><p>{department.description || 'Team department'}</p><div className="department-metrics"><span><strong>{team.length}</strong> people</span><span><strong>{active}</strong> active</span></div><button className="department-view-link" onClick={() => onSelectDepartment(department.name)}>View employees <span>→</span></button></article>; })}</div></section></div>;
 }
 
+// Website: Team access (Admin-only account role controls).
 function AccessModule({ user }) {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -120,6 +126,7 @@ function AccessModule({ user }) {
   return <section className="module-card access-module"><div className="module-header"><div><div className="eyebrow">WORKSPACE SECURITY</div><h2>Team access</h2><p>Choose what each account can see and manage. Role changes apply immediately.</p></div><span className="access-count">{accounts.length} account{accounts.length === 1 ? '' : 's'}</span></div>{error && <div className="form-error module-message">{error}</div>}{loading ? <div className="module-empty">Loading accounts…</div> : <><div className="access-role-guide">{Object.entries(roleDescriptions).map(([role, description]) => <div key={role}><span className={`role-badge ${role.toLowerCase()}`}>{role}</span><p>{description}</p></div>)}</div><div className="access-table"><div className="access-table-head"><span>ACCOUNT</span><span>ROLE</span></div>{accounts.map((account) => <div className="access-row" key={account._id}><div className="access-user"><div className="user-avatar">{initials(account.name)}</div><span><strong>{account.name}{account._id === user.id ? ' (you)' : ''}</strong><small>{account.email}</small></span></div>{account._id === user.id ? <span className={`role-badge ${account.role.toLowerCase()}`}>{account.role}</span> : <select aria-label={`Role for ${account.name}`} value={account.role} onChange={(event) => changeRole(account, event.target.value)}><option>Employee</option><option>Manager</option><option>Admin</option></select>}</div>)}</div><p className="access-footnote">New registrations are Employees by default. The first account is made Admin. Only an Admin can change roles, and the workspace always keeps at least one Admin.</p></>}</section>;
 }
 
+// Main signed-in workspace: navigation, Overview, directory, and feature modules.
 function EmployeeDashboard({ user, onLogout }) {
   const [employees, setEmployees] = useState([]);
   const [departmentRecords, setDepartmentRecords] = useState([]);
@@ -142,6 +149,7 @@ function EmployeeDashboard({ user, onLogout }) {
   const [viewEmployee, setViewEmployee] = useState(null);
   const pageSize = 8;
 
+  // Website: Reports → Employee CSV download.
   async function exportCsv() {
     try {
       const response = await api.get('/employees/export/csv', { responseType: 'blob' });
@@ -152,6 +160,7 @@ function EmployeeDashboard({ user, onLogout }) {
     window.setTimeout(() => setNotice(''), 3000);
   }
 
+  // Website: Reports → SOAP XML demo button.
   async function testSoap() {
     const envelope = '<?xml version="1.0"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><GetEmployees /></soap:Body></soap:Envelope>';
     try {
@@ -162,6 +171,7 @@ function EmployeeDashboard({ user, onLogout }) {
     window.setTimeout(() => setNotice(''), 3000);
   }
 
+  // Loads the directory from GET /api/employees.
   async function loadEmployees() {
     setLoading(true);
     try { setEmployees((await api.get('/employees')).data); setError(''); }
@@ -195,6 +205,7 @@ function EmployeeDashboard({ user, onLogout }) {
     setForm({ ...blank, ...employee, startDate: employee.startDate ? new Date(employee.startDate).toISOString().slice(0, 10) : '' });
     setError(''); setModalOpen(true);
   }
+  // Add/Edit employee modal: POST for new records, PUT for edits.
   async function saveEmployee(event) {
     event.preventDefault(); setError('');
     try {
@@ -241,6 +252,7 @@ function EmployeeDashboard({ user, onLogout }) {
 
   return <div className="app-shell">
     <main className="main-content">
+      {/* Website: top navigation, including the People and Time & leave hover menus. */}
       <header className="topbar">
         <a className="brand topbar-brand" href="#overview" onClick={(event) => { event.preventDefault(); setActiveModule('dashboard'); }}><span className="brand-mark"><Users size={19} strokeWidth={2.5} /></span><span>people<span className="brand-light">desk</span></span></a>
         <nav className="topnav" aria-label="Main navigation">
@@ -255,6 +267,7 @@ function EmployeeDashboard({ user, onLogout }) {
       <section className="page-content">
         <div className="heading-row"><div><div className="eyebrow">PEOPLE OPERATIONS</div><h1>{moduleTitles[activeModule]} {['employees', 'departments'].includes(activeModule) && <span className="title-count">{activeModule === 'employees' ? employees.length : departmentRecords.length}</span>}</h1><p className="subtitle">{moduleDescriptions[activeModule]}</p></div>{isAdmin && ['dashboard', 'employees'].includes(activeModule) && <div className="heading-actions"><button className="primary-button" onClick={() => { setActiveModule('employees'); openCreate(); }}><UserPlus size={17} /> Add employee</button></div>}</div>
 
+        {/* Website: Overview dashboard cards and people-operations summaries. */}
         {activeModule === 'dashboard' && <><div className="stats-row">
           <SummaryCard icon={Users} tone="purple" label="Total employees" value={employees.length} />
           <SummaryCard icon={UserCheck} tone="green" label="Active employees" value={activeCount} />
@@ -264,6 +277,7 @@ function EmployeeDashboard({ user, onLogout }) {
           <SummaryCard icon={Plane} tone="orange" label="Pending leave" value={pendingDashboardRequests.length} />
         </div><div className="overview-grid"><section className="module-card overview-welcome"><div className="welcome-orb"><Users size={22} /></div><div><div className="eyebrow">YOUR WORKSPACE</div><h2>Welcome back, {user.name.split(' ')[0]}</h2><p>Manage your people, time off, and daily attendance from one place.</p></div><div className="quick-links"><button onClick={() => { setActiveModule('employees'); openCreate(); }}><UserPlus size={15} />Add a new teammate</button><button onClick={() => setActiveModule('attendance')}><ClipboardCheck size={15} />Record today’s attendance</button><button onClick={() => setActiveModule('leave')}><Plane size={15} />Review leave requests</button></div></section><section className="module-card dashboard-ops"><div className="module-header compact"><div><div className="eyebrow">TODAY AT A GLANCE</div><h2>Attendance &amp; time off</h2><p>{new Date(`${localToday()}T00:00:00`).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p></div><button className="text-button" onClick={() => setActiveModule('attendance')}>Open attendance →</button></div>{dashboardOpsError && <div className="form-error module-message">{dashboardOpsError}</div>}<div className="ops-grid"><div className="attendance-overview"><div className="ops-main-number">{todayAttendance.length}<small> marked today</small></div><div className="ops-statuses"><span><i className="legend-dot present-dot" />{attendanceTotals.Present} present</span><span><i className="legend-dot late-dot" />{attendanceTotals.Late} late</span><span><i className="legend-dot absent-dot" />{attendanceTotals.Absent} absent</span><span><i className="legend-dot remote-dot" />{attendanceTotals['Work from home']} remote</span></div></div><div className="pending-overview"><div className="pending-overview-top"><strong>Leave requests to review</strong><button onClick={() => setActiveModule('leave')}>See all</button></div>{pendingDashboardRequests.slice(0, 3).map((request) => <div className="pending-preview" key={request._id}><span className="pending-avatar">{initials(request.employeeId?.name || '?')}</span><span><strong>{request.employeeId?.name || 'Unknown employee'}</strong><small>{request.type} · {new Date(request.startDate).toLocaleDateString()}</small></span><span className="pending-tag">Pending</span></div>)}{!pendingDashboardRequests.length && <p className="no-pending">No pending requests. You’re all caught up.</p>}</div></div></section><section className="module-card overview-departments"><div className="module-header compact"><div><div className="eyebrow">TEAM STRUCTURE</div><h2>People by department</h2></div><button className="text-button" onClick={() => setActiveModule('departments')}>View teams →</button></div>{departmentOptions.length ? departmentOptions.slice(0, 6).map((name) => { const count = employees.filter((employee) => employee.department === name).length; const percent = employees.length ? Math.max(3, Math.round(count / employees.length * 100)) : 0; return <button className="department-bar-row" key={name} onClick={() => goToDirectory(name)}><span>{name}</span><span className="department-bar-track"><i style={{ width: `${percent}%` }} /></span><strong>{count}</strong></button>; }) : <div className="module-empty">Add employees to see team distribution.</div>}</section><section className="module-card recent-team"><div className="module-header compact"><div><div className="eyebrow">RECENT CHANGES</div><h2>Recently updated records</h2></div><button className="text-button" onClick={() => setActiveModule('employees')}>View directory →</button></div>{[...employees].sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)).slice(0, 5).map((employee, index) => <button className="recent-employee" key={employee._id} onClick={() => { setActiveModule('employees'); setViewEmployee(employee); }}><div className={`employee-avatar ${colors[index % colors.length]}`}>{initials(employee.name)}</div><span><strong>{employee.name}</strong><small>{employee.role} · Updated {new Date(employee.updatedAt || employee.createdAt).toLocaleDateString()}</small></span><span className={`status-pill ${(employee.status || 'Active').toLowerCase().replace(' ', '-')}`}>{employee.status || 'Active'}</span></button>)}{!employees.length && <div className="module-empty compact-empty">No employee changes yet. Add your first teammate to get started.</div>}</section><section className="module-card overview-shortcuts"><div className="eyebrow">PEOPLE OPERATIONS</div><h2>Management modules</h2><p>Choose a module to handle a different part of the employee lifecycle.</p><div className="module-shortcuts">{!isEmployee && <button onClick={() => setActiveModule('departments')}><Building2 size={18} /><strong>Departments</strong><small>Team structure and headcount</small></button>}<button onClick={() => setActiveModule('attendance')}><ClipboardCheck size={18} /><strong>Attendance</strong><small>Daily team attendance register</small></button><button onClick={() => setActiveModule('leave')}><Plane size={18} /><strong>Leave requests</strong><small>Review and approve time off</small></button>{canManageWorkforce && <button onClick={() => setActiveModule('reports')}><ChartNoAxesCombined size={18} /><strong>Reports</strong><small>Export employee data</small></button>}</div></section></div></>}
 
+        {/* Website: People → Employee directory table, filters, and row actions. */}
         {activeModule === 'employees' && <div className="directory-card" id="employee-directory">
           <div className="directory-heading"><div><h2>All employees</h2><p>Manage your team members and their details.</p></div><span className="updated-note"><span className="status-dot" /> Live directory</span></div>
           <div className="toolbar"><label className="search-box"><Search size={16} /><input value={query} onChange={(event) => { setQuery(event.target.value); setCurrentPage(1); }} placeholder="Search name, email, role..." /></label><label className="select-wrap"><select value={department} onChange={(event) => { setDepartment(event.target.value); setCurrentPage(1); }}><option>All departments</option>{departmentOptions.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={15} /></label><label className="select-wrap"><select value={statusFilter} onChange={(event) => { setStatusFilter(event.target.value); setCurrentPage(1); }}><option>All statuses</option><option>Active</option><option>On Leave</option><option>Inactive</option></select><ChevronDown size={15} /></label><label className="select-wrap sort-select"><select value={sortOrder} onChange={(event) => { setSortOrder(event.target.value); setCurrentPage(1); }}><option>Newest first</option><option>Oldest first</option><option>Name A–Z</option><option>Name Z–A</option></select><ArrowUpDown size={14} /></label></div>

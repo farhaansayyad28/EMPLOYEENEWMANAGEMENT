@@ -6,6 +6,7 @@ import authenticate from '../middleware/authenticate.js';
 
 const router = Router();
 
+// Creates the 12-hour JWT stored by the browser after sign-in.
 function makeToken(user) {
   return jwt.sign({ id: user._id.toString(), name: user.name, email: user.email, role: user.role || 'Employee' }, process.env.JWT_SECRET, { expiresIn: '12h' });
 }
@@ -30,6 +31,7 @@ function publicUser(user) {
   return { id: user._id.toString(), name: user.name, email: user.email, role: user.role };
 }
 
+// POST /api/auth/register creates an account; the first account is Admin.
 router.post('/register', async (req, res, next) => {
   try {
     const name = String(req.body.name || '').trim();
@@ -45,6 +47,7 @@ router.post('/register', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
+// POST /api/auth/login verifies the password and returns the signed-in user.
 router.post('/login', async (req, res, next) => {
   try {
     const email = String(req.body.email || '').trim().toLowerCase();
@@ -58,6 +61,7 @@ router.post('/login', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
+// GET /api/auth/me refreshes the browser's account details and role.
 router.get('/me', authenticate, async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);

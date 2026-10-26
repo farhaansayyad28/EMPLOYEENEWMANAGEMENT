@@ -6,6 +6,7 @@ import Department from '../models/Department.js';
 import Employee from '../models/Employee.js';
 
 const router = Router();
+// Website: People → Departments; GET lists teams and Admin routes change them.
 router.use(authenticate);
 const starterDepartments = ['Engineering', 'Design', 'Marketing', 'Human Resources', 'Finance', 'Operations', 'Sales'];
 

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 
+// MongoDB leave document: employee, dates, reason, and approval status.
 const leaveRequestSchema = new mongoose.Schema({
   employeeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee', required: true },
   type: { type: String, enum: ['Annual leave', 'Sick leave', 'Personal leave', 'Unpaid leave'], required: true },

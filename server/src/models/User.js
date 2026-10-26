@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 
+// MongoDB account document: login details and Admin/Manager/Employee permission.
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true, maxlength: 80 },
   email: { type: String, required: true, trim: true, lowercase: true, unique: true },

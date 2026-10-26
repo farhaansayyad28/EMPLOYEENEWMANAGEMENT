@@ -5,6 +5,7 @@ import Department from './models/Department.js';
 import Employee from './models/Employee.js';
 import LeaveRequest from './models/LeaveRequest.js';
 
+// Run with `npm run seed:demo`; inserts sample records without replacing existing data.
 if (!process.env.MONGODB_URI) {
   console.error('MONGODB_URI is missing. Create server/.env before seeding demo data.');
   process.exit(1);

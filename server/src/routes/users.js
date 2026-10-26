@@ -5,6 +5,7 @@ import authorize from '../middleware/authorize.js';
 import User from '../models/User.js';
 
 const router = Router();
+// Website: Team access; only Admin accounts can list users or change their roles.
 router.use(authenticate, authorize('Admin'));
 const roles = new Set(['Admin', 'Manager', 'Employee']);
 

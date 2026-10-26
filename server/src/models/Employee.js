@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 
+// MongoDB employee document: profile and employment fields used by the directory.
 const employeeSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   email: { type: String, required: true, trim: true, lowercase: true, unique: true },

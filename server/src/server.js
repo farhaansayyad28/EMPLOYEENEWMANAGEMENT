@@ -13,6 +13,7 @@ import leaveRequestRoutes from './routes/leaveRequests.js';
 import userRoutes from './routes/users.js';
 
 const app = express();
+// Shared middleware and REST routes used by the React client.
 app.use(cors());
 app.use(express.json());
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
@@ -22,6 +23,7 @@ app.use('/api/employees', employeeRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/leave-requests', leaveRequestRoutes);
+// Optional SOAP XML learning demo; the rest of the app uses REST/JSON.
 app.use('/api/soap', express.text({ type: ['text/xml', 'application/soap+xml'] }));
 app.post('/api/soap', authenticate, authorize('Admin', 'Manager'), async (req, res, next) => {
   try {
@@ -38,6 +40,7 @@ app.post('/api/soap', authenticate, authorize('Admin', 'Manager'), async (req, r
   } catch (error) { next(error); }
 });
 
+// Send readable API errors for duplicate records, invalid data, and server failures.
 app.use((error, _req, res, _next) => {
   if (error.code === 11000) return res.status(409).json({ message: 'An account or employee with this email already exists.' });
   if (error.name === 'ValidationError') return res.status(400).json({ message: error.message });
@@ -56,6 +59,7 @@ if (!process.env.JWT_SECRET) {
   process.exit(1);
 }
 
+// Start listening only after MongoDB has connected successfully.
 try {
   await mongoose.connect(mongoUri);
   console.log('Connected to MongoDB');

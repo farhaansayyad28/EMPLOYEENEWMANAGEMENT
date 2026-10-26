@@ -6,6 +6,7 @@ import Employee from '../models/Employee.js';
 import LeaveRequest from '../models/LeaveRequest.js';
 
 const router = Router();
+// Website: Time & leave → Leave requests; routes submit, review, and cancel requests.
 router.use(authenticate);
 const leaveTypes = new Set(['Annual leave', 'Sick leave', 'Personal leave', 'Unpaid leave']);
 const statuses = new Set(['Pending', 'Approved', 'Declined']);

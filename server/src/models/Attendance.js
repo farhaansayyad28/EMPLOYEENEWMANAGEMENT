@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 
+// MongoDB attendance document: one employee's status for a single day.
 const attendanceSchema = new mongoose.Schema({
   employeeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee', required: true },
   date: { type: String, required: true },

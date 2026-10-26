@@ -7,6 +7,7 @@ import authorize from '../middleware/authorize.js';
 import Employee from '../models/Employee.js';
 
 const router = Router();
+// Website: People → Employee directory; this route file handles employee CRUD and CSV export.
 const fields = ['name', 'email', 'department', 'role', 'phone', 'location', 'employmentType', 'status', 'startDate', 'notes'];
 router.use(authenticate);
 
@@ -14,6 +15,7 @@ function employeeInput(body) {
   return Object.fromEntries(fields.map((field) => [field, body[field]]));
 }
 
+// GET lists the full directory for managers, or the signed-in employee's own profile.
 router.get('/', async (_req, res, next) => {
   try {
     const filter = _req.user.role === 'Employee' ? { email: _req.user.email } : {};

@@ -6,6 +6,7 @@ import Attendance from '../models/Attendance.js';
 import Employee from '../models/Employee.js';
 
 const router = Router();
+// Website: Time & leave → Attendance; routes read history or save the daily register.
 router.use(authenticate);
 const validDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value || '') && !Number.isNaN(Date.parse(`${value}T00:00:00.000Z`));
 const statuses = new Set(['Present', 'Late', 'Absent', 'Work from home', 'Not marked']);

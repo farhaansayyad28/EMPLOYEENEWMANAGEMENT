@@ -4,6 +4,7 @@ import axios from 'axios';
 
 const api = axios.create({ baseURL: 'http://localhost:5000/api' });
 
+// Website: sign-in and create-account screen shown before the workspace.
 export default function AuthScreen({ onAuthenticated }) {
   const [mode, setMode] = useState('login');
   const [form, setForm] = useState({ name: '', email: '', password: '' });
