@@ -10,6 +10,12 @@ The learning document uses a Student Management System as its example. This proj
 - Email (must be unique)
 - Department
 - Role / job title
+- Phone and work location
+- Employment type (full-time, part-time, contract, or intern)
+- Status (active, on leave, or inactive)
+- Start date and optional internal notes
+
+The directory includes search, department and status filters, sorting, pagination, employee profiles, and CSV export. Employment status can be changed from the employee row menu; records can also be permanently deleted after confirmation.
 
 ## Requirements
 
@@ -101,7 +107,7 @@ The API runs at `http://localhost:5000`. Check `http://localhost:5000/api/health
 | POST | `/api/employees` | Add an employee |
 | PUT | `/api/employees/:id` | Edit an employee |
 | DELETE | `/api/employees/:id` | Delete an employee |
-| GET | `/api/employees/export/csv` | Create and download an employee CSV (requires sign-in) |
+| GET | `/api/employees/export/csv` | Download an employee CSV with profile and status fields (requires sign-in) |
 | POST | `/api/auth/register` | Create an account; password is stored as a bcrypt hash |
 | POST | `/api/auth/login` | Sign in and receive a 12-hour JWT |
 | POST | `/api/soap` | SOAP XML demo that returns employees (requires sign-in) |
@@ -136,17 +142,17 @@ The main CRUD interface uses REST/JSON. The SOAP button is a small comparison/de
 ## Quick demo checklist
 
 1. Create an account, then sign in.
-2. Add an employee with all four fields.
-3. Check that the new employee appears and the summary counts update.
-4. Search by name or email; filter by department.
-5. Edit the role and save.
+2. Add an employee with contact, department, job, status, and start-date details.
+3. Check that the employee appears and the dashboard counts update.
+4. Search, filter by department or status, sort the directory, and move between pages.
+5. Open the employee profile, edit details, and try the row menu to change status.
 6. Export the CSV and press **SOAP demo** to verify both additional features.
-7. Delete the employee and confirm the row disappears.
+7. Delete a test employee and confirm the row disappears.
 8. Sign out and sign back in; the employee record should still be saved.
 
 ## Viva explanation
 
-“This is an Employee Management System built with the MERN stack. React provides the user interface and Axios sends requests to an Express API running on Node.js. Mongoose validates and stores employee documents in MongoDB. I implemented CRUD with POST, GET, PUT, and DELETE. Accounts register and sign in through an API; passwords are hashed with bcrypt and the backend protects employee routes with a JWT. I also added a CSV export using Node's file-system module and a SOAP XML demo route to compare SOAP with the REST/JSON API used by the app.”
+“This is an Employee Management System built with the MERN stack. React provides the interface and Axios sends requests to an Express API running on Node.js. Mongoose validates and stores employee documents in MongoDB. Each employee has contact details, department, role, employment type, status, start date, and notes. I implemented CRUD with POST, GET, PUT, and DELETE, plus search, filters, sorting, pagination, department views, employee profiles, and CSV export. Accounts register and sign in through an API; passwords are hashed with bcrypt and employee routes use JWT authentication. A SOAP XML demo shows how SOAP differs from the REST/JSON API used by the app.”
 
 ### Short theory answers to prepare
 

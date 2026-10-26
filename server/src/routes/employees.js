@@ -6,7 +6,7 @@ import authenticate from '../middleware/authenticate.js';
 import Employee from '../models/Employee.js';
 
 const router = Router();
-const fields = ['name', 'email', 'department', 'role'];
+const fields = ['name', 'email', 'department', 'role', 'phone', 'location', 'employmentType', 'status', 'startDate', 'notes'];
 router.use(authenticate);
 
 function employeeInput(body) {
@@ -52,8 +52,8 @@ router.get('/export/csv', async (_req, res, next) => {
       return `"${/^[=+@\-]/.test(cell) ? `'${cell}` : cell}"`;
     };
     const csv = [
-      ['Name', 'Email', 'Department', 'Role'].map(quote).join(','),
-      ...employees.map((employee) => [employee.name, employee.email, employee.department, employee.role].map(quote).join(','))
+      ['Name', 'Email', 'Department', 'Role', 'Phone', 'Location', 'Employment type', 'Status', 'Start date', 'Notes'].map(quote).join(','),
+      ...employees.map((employee) => [employee.name, employee.email, employee.department, employee.role, employee.phone, employee.location, employee.employmentType, employee.status, employee.startDate?.toISOString().slice(0, 10), employee.notes].map(quote).join(','))
     ].join('\r\n');
     const exportPath = resolve('exports', 'employees.csv');
     await mkdir(dirname(exportPath), { recursive: true });

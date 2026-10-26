@@ -23,7 +23,7 @@ app.post('/api/soap', authenticate, async (req, res, next) => {
     }
     const escapeXml = (value) => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&apos;');
     const employees = await Employee.find().sort({ createdAt: -1 });
-    const items = employees.map((employee) => `<Employee><Id>${escapeXml(employee._id)}</Id><Name>${escapeXml(employee.name)}</Name><Email>${escapeXml(employee.email)}</Email><Department>${escapeXml(employee.department)}</Department><Role>${escapeXml(employee.role)}</Role></Employee>`).join('');
+    const items = employees.map((employee) => `<Employee><Id>${escapeXml(employee._id)}</Id><Name>${escapeXml(employee.name)}</Name><Email>${escapeXml(employee.email)}</Email><Department>${escapeXml(employee.department)}</Department><Role>${escapeXml(employee.role)}</Role><Status>${escapeXml(employee.status || 'Active')}</Status><Location>${escapeXml(employee.location)}</Location></Employee>`).join('');
     const response = `<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><GetEmployeesResponse>${items}</GetEmployeesResponse></soap:Body></soap:Envelope>`;
     res.type('application/soap+xml').send(response);
   } catch (error) { next(error); }
