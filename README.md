@@ -18,6 +18,52 @@ The learning document uses a Student Management System as its example. This proj
 
 ## Setup
 
+### Windows quick setup
+
+1. Download the project from GitHub with **Code → Download ZIP**, then extract it and open the `employee-management` folder in Command Prompt or PowerShell.
+2. Install Node.js (which includes npm) and make sure MongoDB Community Server is installed and running locally. MongoDB Compass is optional; it is only a graphical viewer.
+3. Install the project dependencies:
+
+   ```cmd
+   npm run install:all
+   ```
+
+4. Create the backend environment file. In **Command Prompt**, run:
+
+   ```cmd
+   copy server\.env.example server\.env
+   notepad server\.env
+   ```
+
+   In **PowerShell**, use:
+
+   ```powershell
+   Copy-Item server/.env.example server/.env
+   notepad server/.env
+   ```
+
+   Save the file with these settings for local MongoDB:
+
+   ```env
+   PORT=5000
+   MONGODB_URI=mongodb://127.0.0.1:27017/employee_management
+   JWT_SECRET=replace-this-with-a-long-random-secret
+   ```
+
+   Save it as `server/.env` (make sure Windows has not added `.txt`). The `.env` file is local and is not included in GitHub; each person creates their own.
+
+5. Start the app from the project folder:
+
+   ```cmd
+   npm run dev
+   ```
+
+6. Open `http://localhost:5173`, create an account, and add employees. MongoDB creates the `employee_management` database and `employees` collection when the first employee is saved.
+
+If using MongoDB Atlas instead, put the Atlas connection string in `MONGODB_URI` and keep it private. The rest of the steps are the same.
+
+### macOS/Linux or general setup
+
 1. Open a terminal in the `employee-management` folder.
 2. Install all project dependencies:
 
