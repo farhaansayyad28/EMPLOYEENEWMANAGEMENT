@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import authenticate from '../middleware/authenticate.js';
+import authorize from '../middleware/authorize.js';
 import Employee from '../models/Employee.js';
 
 const router = Router();
@@ -15,18 +16,19 @@ function employeeInput(body) {
 
 router.get('/', async (_req, res, next) => {
   try {
-    res.json(await Employee.find().sort({ createdAt: -1 }));
+    const filter = _req.user.role === 'Employee' ? { email: _req.user.email } : {};
+    res.json(await Employee.find(filter).sort({ createdAt: -1 }));
   } catch (error) { next(error); }
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', authorize('Admin'), async (req, res, next) => {
   try {
     const employee = await Employee.create(employeeInput(req.body));
     res.status(201).json(employee);
   } catch (error) { next(error); }
 });
 
-router.put('/:id', async (req, res, next) => {
+router.put('/:id', authorize('Admin'), async (req, res, next) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ message: 'Invalid employee ID.' });
     const employee = await Employee.findByIdAndUpdate(req.params.id, employeeInput(req.body), { new: true, runValidators: true });
@@ -35,7 +37,7 @@ router.put('/:id', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', authorize('Admin'), async (req, res, next) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ message: 'Invalid employee ID.' });
     const employee = await Employee.findByIdAndDelete(req.params.id);
@@ -44,7 +46,7 @@ router.delete('/:id', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.get('/export/csv', async (_req, res, next) => {
+router.get('/export/csv', authorize('Admin', 'Manager'), async (_req, res, next) => {
   try {
     const employees = await Employee.find().sort({ name: 1 });
     const quote = (value) => {

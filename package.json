@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "install:all": "npm install && cd server && npm install && cd .. && cd client && npm install",
-    "dev": "concurrently \"npm --prefix server run dev\" \"npm --prefix client run dev\""
+    "dev": "concurrently \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "seed:demo": "npm --prefix server run seed:demo"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

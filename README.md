@@ -75,6 +75,14 @@ The directory includes search, department and status filters, sorting, paginatio
 
 6. Open `http://localhost:5173` and create an account. MongoDB creates the `employee_management` database and its collections as you use the modules.
 
+To populate the dashboard with sample records, open a second terminal in the project folder after MongoDB is running and run:
+
+```cmd
+npm run seed:demo
+```
+
+Refresh the browser afterward. This adds five sample employees, today's attendance, and two upcoming leave requests. It does not create login accounts, overwrite existing records, or remove data; it is safe to run again. The sample employee emails use the reserved `.test` domain.
+
 If using MongoDB Atlas instead, put the Atlas connection string in `MONGODB_URI` and keep it private. The rest of the steps are the same.
 
 ### macOS/Linux or general setup
@@ -106,6 +114,8 @@ If using MongoDB Atlas instead, put the Atlas connection string in `MONGODB_URI`
 6. Open the Vite URL printed in the terminal, usually `http://localhost:5173`.
 7. Choose **Create an account** on the sign-in page, register once, then add employee records. The password must be at least 8 characters.
 
+To load optional demo records after MongoDB is running and `server/.env` is configured, run `npm run seed:demo` from the project folder, then refresh the browser.
+
 The API runs at `http://localhost:5000`. Check `http://localhost:5000/api/health` to confirm it is responding.
 
 ## API routes
@@ -127,9 +137,12 @@ The API runs at `http://localhost:5000`. Check `http://localhost:5000/api/health
 | DELETE | `/api/leave-requests/:id` | Delete a leave request |
 | POST | `/api/auth/register` | Create an account; password is stored as a bcrypt hash |
 | POST | `/api/auth/login` | Sign in and receive a 12-hour JWT |
+| GET | `/api/auth/me` | Refresh the signed-in account and role |
+| GET | `/api/users` | List accounts (Admin only) |
+| PATCH | `/api/users/:id/role` | Assign an account role (Admin only) |
 | POST | `/api/soap` | SOAP XML demo that returns employees (requires sign-in) |
 
-Employee routes require the bearer token returned by login or registration. The React app attaches it automatically and provides a sign-out button. For this class project, registration is open; there are no role-based permissions.
+Employee routes require the bearer token returned by login or registration. The React app attaches it automatically and provides a sign-out button. The first account becomes Admin; later registrations start as Employees. Admins can assign Admin, Manager, or Employee roles from Team access. Managers can manage attendance and leave approvals; Employees see only their own matching employee profile, attendance, and leave requests. Employee and department editing is Admin-only.
 
 The **Export CSV** button downloads `employees.csv` in the browser and writes a server-side copy to `server/exports/employees.csv` using Node's file-system module. The **SOAP demo** button sends a SOAP XML `GetEmployees` request; the response is an XML SOAP envelope. The main app still uses REST/JSON for its regular CRUD operations.
 

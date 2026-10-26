@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
 import authenticate from '../middleware/authenticate.js';
+import authorize from '../middleware/authorize.js';
 import Attendance from '../models/Attendance.js';
 import Employee from '../models/Employee.js';
 
@@ -13,7 +14,12 @@ router.get('/history', async (req, res, next) => {
   try {
     const { from, to } = req.query;
     if (!validDate(from) || !validDate(to) || from > to) return res.status(400).json({ message: 'Provide a valid date range in YYYY-MM-DD format.' });
-    res.json(await Attendance.find({ date: { $gte: from, $lte: to } }).populate('employeeId', 'name department role').sort({ date: -1, updatedAt: -1 }));
+    const filter = { date: { $gte: from, $lte: to } };
+    if (req.user.role === 'Employee') {
+      const employee = await Employee.findOne({ email: req.user.email }).select('_id');
+      filter.employeeId = employee?._id || null;
+    }
+    res.json(await Attendance.find(filter).populate('employeeId', 'name department role').sort({ date: -1, updatedAt: -1 }));
   } catch (error) { next(error); }
 });
 
@@ -21,11 +27,16 @@ router.get('/', async (req, res, next) => {
   try {
     const date = req.query.date;
     if (!validDate(date)) return res.status(400).json({ message: 'Provide a date in YYYY-MM-DD format.' });
-    res.json(await Attendance.find({ date }).sort({ updatedAt: -1 }));
+    const filter = { date };
+    if (req.user.role === 'Employee') {
+      const employee = await Employee.findOne({ email: req.user.email }).select('_id');
+      filter.employeeId = employee?._id || null;
+    }
+    res.json(await Attendance.find(filter).sort({ updatedAt: -1 }));
   } catch (error) { next(error); }
 });
 
-router.put('/day', async (req, res, next) => {
+router.put('/day', authorize('Admin', 'Manager'), async (req, res, next) => {
   try {
     const { date, records } = req.body;
     if (!validDate(date) || !Array.isArray(records)) return res.status(400).json({ message: 'A valid date and attendance records are required.' });

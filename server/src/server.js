@@ -5,22 +5,25 @@ import mongoose from 'mongoose';
 import employeeRoutes from './routes/employees.js';
 import authRoutes from './routes/auth.js';
 import authenticate from './middleware/authenticate.js';
+import authorize from './middleware/authorize.js';
 import Employee from './models/Employee.js';
 import departmentRoutes from './routes/departments.js';
 import attendanceRoutes from './routes/attendance.js';
 import leaveRequestRoutes from './routes/leaveRequests.js';
+import userRoutes from './routes/users.js';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/leave-requests', leaveRequestRoutes);
 app.use('/api/soap', express.text({ type: ['text/xml', 'application/soap+xml'] }));
-app.post('/api/soap', authenticate, async (req, res, next) => {
+app.post('/api/soap', authenticate, authorize('Admin', 'Manager'), async (req, res, next) => {
   try {
     const xml = typeof req.body === 'string' ? req.body : '';
     if (!/GetEmployees/i.test(xml)) {

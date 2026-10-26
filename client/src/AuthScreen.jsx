@@ -27,5 +27,5 @@ export default function AuthScreen({ onAuthenticated }) {
     <label>Password<input required type="password" minLength="8" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder={isRegistering ? 'At least 8 characters' : 'Your password'} /></label>
     {error && <div className="form-error">{error}</div>}
     <button className="primary-button auth-submit" disabled={busy}>{busy ? 'Please wait…' : isRegistering ? 'Create account' : 'Sign in'}</button>
-  </form><p className="auth-switch">{isRegistering ? 'Already registered?' : 'New to PeopleDesk?'} <button onClick={() => { setMode(isRegistering ? 'login' : 'register'); setError(''); }}> {isRegistering ? 'Sign in' : 'Create an account'}</button></p><p className="auth-note">Your password is stored as a secure hash.</p></section></main>;
+  </form><p className="auth-switch">{isRegistering ? 'Already registered?' : 'New to PeopleDesk?'} <button onClick={() => { setMode(isRegistering ? 'login' : 'register'); setError(''); }}> {isRegistering ? 'Sign in' : 'Create an account'}</button></p><p className="auth-note">First account becomes Admin; new accounts start as Employees. Admin assigns Manager access.</p></section></main>;
 }
