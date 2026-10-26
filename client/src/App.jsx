@@ -100,6 +100,7 @@ function EmployeeDashboard({ user, onLogout }) {
   const [notice, setNotice] = useState('');
   const [employeesExpanded, setEmployeesExpanded] = useState(true);
   const [workforceExpanded, setWorkforceExpanded] = useState(true);
+  const [reportsExpanded, setReportsExpanded] = useState(false);
   const [activeModule, setActiveModule] = useState('dashboard');
   const [actionsOpen, setActionsOpen] = useState(false);
   const [openRowMenu, setOpenRowMenu] = useState(null);
@@ -208,7 +209,8 @@ function EmployeeDashboard({ user, onLogout }) {
       </div>}
       <button className={`nav-item ${['attendance', 'leave'].includes(activeModule) ? 'active' : ''}`} onClick={() => setWorkforceExpanded((expanded) => !expanded)} aria-expanded={workforceExpanded} aria-controls="workforce-submenu"><Clock3 size={17} /><span>Time &amp; leave</span><ChevronDown size={14} className={`nav-chevron ${workforceExpanded ? 'expanded' : ''}`} /></button>
       {workforceExpanded && <div className="nav-submenu" id="workforce-submenu"><button className={`nav-subitem ${activeModule === 'attendance' ? 'selected' : ''}`} onClick={() => setActiveModule('attendance')}><ClipboardCheck size={14} />Attendance</button><button className={`nav-subitem ${activeModule === 'leave' ? 'selected' : ''}`} onClick={() => setActiveModule('leave')}><Plane size={14} />Leave requests</button></div>}
-      <button className={`nav-item ${activeModule === 'reports' ? 'active' : ''}`} onClick={() => setActiveModule('reports')}><ChartNoAxesCombined size={17} /><span>Reports</span></button>
+      <button className={`nav-item ${activeModule === 'reports' ? 'active' : ''}`} onClick={() => setReportsExpanded((expanded) => !expanded)} aria-expanded={reportsExpanded} aria-controls="reports-submenu"><ChartNoAxesCombined size={17} /><span>Reports</span><ChevronDown size={14} className={`nav-chevron ${reportsExpanded ? 'expanded' : ''}`} /></button>
+      {reportsExpanded && <div className="nav-submenu" id="reports-submenu"><button className={`nav-subitem ${activeModule === 'reports' ? 'selected' : ''}`} onClick={() => setActiveModule('reports')}><ChartNoAxesCombined size={14} />Workforce summary</button><button className="nav-subitem" onClick={exportCsv}><Download size={14} />Employee CSV export</button><button className="nav-subitem" onClick={testSoap}><FileCode2 size={14} />SOAP XML demo</button></div>}
       <div className="sidebar-bottom"><div className="workspace-label">YOUR WORKSPACE</div><div className="workspace-card"><div className="workspace-avatar">AC</div><div><strong>Acme Creative</strong><small>Free workspace</small></div><ChevronDown size={15} className="workspace-chevron" /></div></div>
     </aside>
 
