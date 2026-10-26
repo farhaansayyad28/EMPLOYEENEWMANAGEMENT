@@ -2,7 +2,7 @@
 
 A small MERN CRUD project. Add, view, edit, and delete employee records with a React/Vite interface, an Express API, and MongoDB storage.
 
-The learning document uses a Student Management System as its example. This project uses employees instead, while demonstrating the same MERN architecture and CRUD/API concepts. It intentionally uses the database `employee_management`, collection `employees`, and employee fields below.
+The learning document uses a Student Management System as its example. This project uses employees instead, while demonstrating the same MERN architecture and CRUD/API concepts. It uses the MongoDB database `employee_management` and creates collections for employees, departments, attendance, and leave requests.
 
 ## Employee fields
 
@@ -16,6 +16,15 @@ The learning document uses a Student Management System as its example. This proj
 - Start date and optional internal notes
 
 The directory includes search, department and status filters, sorting, pagination, employee profiles, and CSV export. Employment status can be changed from the employee row menu; records can also be permanently deleted after confirmation.
+
+## Management modules
+
+- **Overview:** headcount, active employees, employees on leave, new hires, recent team members, and department distribution.
+- **People → Employee directory:** employee profiles, add/edit/delete, search, filters, sorting, and pagination.
+- **People → Departments:** create teams, add descriptions, review department headcount, and remove empty departments.
+- **Time & leave → Attendance:** record each active employee as present, late, absent, or working from home for a selected date. Daily registers are saved in MongoDB.
+- **Time & leave → Leave requests:** submit time-off requests and approve or decline pending requests.
+- **Reports:** employee CSV export and a workforce summary. The SOAP XML example remains available as a separate API learning demo.
 
 ## Requirements
 
@@ -64,7 +73,7 @@ The directory includes search, department and status filters, sorting, paginatio
    npm run dev
    ```
 
-6. Open `http://localhost:5173`, create an account, and add employees. MongoDB creates the `employee_management` database and `employees` collection when the first employee is saved.
+6. Open `http://localhost:5173` and create an account. MongoDB creates the `employee_management` database and its collections as you use the modules.
 
 If using MongoDB Atlas instead, put the Atlas connection string in `MONGODB_URI` and keep it private. The rest of the steps are the same.
 
@@ -108,6 +117,13 @@ The API runs at `http://localhost:5000`. Check `http://localhost:5000/api/health
 | PUT | `/api/employees/:id` | Edit an employee |
 | DELETE | `/api/employees/:id` | Delete an employee |
 | GET | `/api/employees/export/csv` | Download an employee CSV with profile and status fields (requires sign-in) |
+| GET, POST | `/api/departments` | List departments or add a department |
+| PUT, DELETE | `/api/departments/:id` | Edit or delete an empty department |
+| GET | `/api/attendance?date=YYYY-MM-DD` | View the daily attendance register |
+| PUT | `/api/attendance/day` | Save the selected day's attendance records |
+| GET, POST | `/api/leave-requests` | List leave requests or create one |
+| PATCH | `/api/leave-requests/:id/status` | Approve or decline a request |
+| DELETE | `/api/leave-requests/:id` | Delete a leave request |
 | POST | `/api/auth/register` | Create an account; password is stored as a bcrypt hash |
 | POST | `/api/auth/login` | Sign in and receive a 12-hour JWT |
 | POST | `/api/soap` | SOAP XML demo that returns employees (requires sign-in) |
@@ -124,6 +140,7 @@ These routes use the same REST pattern as `/students`: the resource name is `emp
 |---|---|
 | MongoDB → Express/Node → React architecture | MongoDB stores records; the Express API in `server/src` accesses them through Mongoose; the Vite React app in `client/src` calls that API with Axios. |
 | Database → collection → document | Database `employee_management` → collection `employees` → one employee per document. MongoDB adds each document's `_id`. |
+| Related HR modules | Separate Mongoose models persist departments, daily attendance, and leave requests in their own MongoDB collections. |
 | Mongoose schema/model | `server/src/models/Employee.js` defines the employee fields, validation, and model. |
 | REST CRUD APIs | `server/src/routes/employees.js` implements GET, POST, PUT, and DELETE. |
 | Express routing, middleware, requests, responses, and errors | `server/src/server.js` sets up CORS, JSON parsing, health/API routes, and error handling. The router reads request bodies and URL IDs, then returns JSON and HTTP status codes. |
@@ -137,7 +154,7 @@ These routes use the same REST pattern as `/students`: the resource name is `emp
 
 The working app covers the core practical: React → Axios → Express/Node → Mongoose → MongoDB, plus Create, Read, Update, and Delete. Adding an employee is the equivalent of registering a record. It also includes account registration and login, a SOAP XML read demo, and CSV export through Node's file-system module.
 
-The main CRUD interface uses REST/JSON. The SOAP button is a small comparison/demo feature, not a replacement for the REST API. The project does not use RESTless APIs; that remains a theory topic for the viva. Node architecture is also a study concept, while the CSV export demonstrates the file-system module in practice.
+The app's regular modules use REST/JSON. The SOAP button is a separate comparison/demo feature, not a replacement for REST. RESTless APIs remain a theory topic for the viva. Node architecture is also a study concept, while CSV export demonstrates the file-system module in practice.
 
 ## Quick demo checklist
 
@@ -146,13 +163,15 @@ The main CRUD interface uses REST/JSON. The SOAP button is a small comparison/de
 3. Check that the employee appears and the dashboard counts update.
 4. Search, filter by department or status, sort the directory, and move between pages.
 5. Open the employee profile, edit details, and try the row menu to change status.
-6. Export the CSV and press **SOAP demo** to verify both additional features.
-7. Delete a test employee and confirm the row disappears.
-8. Sign out and sign back in; the employee record should still be saved.
+6. Add a department, then open **Attendance**, mark the team, and save the daily register.
+7. Create a leave request and approve or decline it from the request list.
+8. Open **Reports** to export the employee CSV and view the workforce summary; run the SOAP demo if required for class.
+9. Delete a test employee and confirm the row disappears.
+10. Sign out and sign back in; employee and module data should still be saved.
 
 ## Viva explanation
 
-“This is an Employee Management System built with the MERN stack. React provides the interface and Axios sends requests to an Express API running on Node.js. Mongoose validates and stores employee documents in MongoDB. Each employee has contact details, department, role, employment type, status, start date, and notes. I implemented CRUD with POST, GET, PUT, and DELETE, plus search, filters, sorting, pagination, department views, employee profiles, and CSV export. Accounts register and sign in through an API; passwords are hashed with bcrypt and employee routes use JWT authentication. A SOAP XML demo shows how SOAP differs from the REST/JSON API used by the app.”
+“This is a PeopleDesk HR management system built with the MERN stack. React provides the interface and Axios sends requests to an Express API running on Node.js. Mongoose stores employees, departments, attendance, and leave requests in MongoDB. I implemented employee CRUD, department management, daily attendance, leave approvals, search, filters, sorting, pagination, employee profiles, and CSV reports. Accounts use bcrypt-hashed passwords and JWT-protected API routes. The everyday modules use REST/JSON; a separate SOAP XML demo shows the difference between the two API styles.”
 
 ### Short theory answers to prepare
 
@@ -160,7 +179,7 @@ The main CRUD interface uses REST/JSON. The SOAP button is a small comparison/de
 - **Mongoose:** Defines the document model and provides methods for working with MongoDB.
 - **Axios:** Sends HTTP requests from the React frontend to the backend and receives JSON responses.
 - **REST:** Organizes an API around resources and uses HTTP methods such as GET, POST, PUT, and DELETE. This project uses REST for the `employees` resource.
-- **SOAP:** A different web-service protocol that uses structured XML messages, commonly described using Envelope, Header, Body, and optional Fault elements. This app does not use SOAP.
+- **SOAP:** A different web-service protocol that uses structured XML messages, commonly described using Envelope, Header, Body, and optional Fault elements. This project includes a small SOAP XML demo; regular management modules use REST/JSON.
 
 ### Simple request flow
 

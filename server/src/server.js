@@ -6,6 +6,9 @@ import employeeRoutes from './routes/employees.js';
 import authRoutes from './routes/auth.js';
 import authenticate from './middleware/authenticate.js';
 import Employee from './models/Employee.js';
+import departmentRoutes from './routes/departments.js';
+import attendanceRoutes from './routes/attendance.js';
+import leaveRequestRoutes from './routes/leaveRequests.js';
 
 const app = express();
 app.use(cors());
@@ -13,6 +16,9 @@ app.use(express.json());
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/employees', employeeRoutes);
+app.use('/api/departments', departmentRoutes);
+app.use('/api/attendance', attendanceRoutes);
+app.use('/api/leave-requests', leaveRequestRoutes);
 app.use('/api/soap', express.text({ type: ['text/xml', 'application/soap+xml'] }));
 app.post('/api/soap', authenticate, async (req, res, next) => {
   try {
