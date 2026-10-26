@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { Users, UserPlus, Search, Pencil, Trash2, X, BriefcaseBusiness, Building2, UserRound, ChevronDown } from 'lucide-react';
+import { Users, UserPlus, Search, Pencil, Trash2, X, BriefcaseBusiness, Building2, UserRound, ChevronDown, MoreHorizontal, Download, FileCode2 } from 'lucide-react';
 import AuthScreen from './AuthScreen.jsx';
 
 const api = axios.create({ baseURL: 'http://localhost:5000/api' });
@@ -28,6 +28,9 @@ function EmployeeDashboard({ user, onLogout }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [employeesExpanded, setEmployeesExpanded] = useState(true);
+  const [actionsOpen, setActionsOpen] = useState(false);
+  const [openRowMenu, setOpenRowMenu] = useState(null);
 
   async function exportCsv() {
     try {
@@ -87,19 +90,29 @@ function EmployeeDashboard({ user, onLogout }) {
   }
 
   const departmentsInUse = [...new Set(employees.map((employee) => employee.department))];
+  function goToDirectory(nextDepartment = 'All departments') {
+    setDepartment(nextDepartment);
+    setQuery('');
+    document.getElementById('employee-directory')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
   return <div className="app-shell">
     <aside className="sidebar">
       <div className="brand"><span className="brand-mark"><Users size={19} strokeWidth={2.5} /></span><span>people<span className="brand-light">desk</span></span></div>
       <div className="workspace-label">WORKSPACE</div>
-      <button className="nav-item active"><Users size={17} /> <span>Employees</span><span className="nav-count">{employees.length}</span></button>
+      <button className={`nav-item ${employeesExpanded ? 'active' : ''}`} onClick={() => setEmployeesExpanded((expanded) => !expanded)} aria-expanded={employeesExpanded} aria-controls="employee-submenu"><Users size={17} /> <span>Employees</span><span className="nav-count">{employees.length}</span><ChevronDown size={14} className={`nav-chevron ${employeesExpanded ? 'expanded' : ''}`} /></button>
+      {employeesExpanded && <div className="nav-submenu" id="employee-submenu">
+        <button className="nav-subitem selected" onClick={() => goToDirectory()}><span className="submenu-dot" />Employee directory</button>
+        <button className="nav-subitem" onClick={openCreate}><UserPlus size={14} />Add employee</button>
+        {departmentsInUse.length > 0 && <><div className="submenu-heading">DEPARTMENTS</div>{departmentsInUse.map((item) => <button className="nav-subitem department-nav" key={item} onClick={() => goToDirectory(item)}><span className="submenu-dot" />{item}<span className="submenu-count">{employees.filter((employee) => employee.department === item).length}</span></button>)}</>}
+      </div>}
       <div className="sidebar-bottom"><div className="workspace-label">YOUR WORKSPACE</div><div className="workspace-card"><div className="workspace-avatar">AC</div><div><strong>Acme Creative</strong><small>Free workspace</small></div><ChevronDown size={15} className="workspace-chevron" /></div></div>
     </aside>
 
     <main className="main-content">
       <header className="topbar"><div className="breadcrumb">Workspace <span>/</span> <strong>Employees</strong></div><div className="topbar-right"><span className="today-label">{user.name}</span><button className="signout-button" onClick={onLogout}>Sign out</button><div className="user-avatar">{initials(user.name)}</div></div></header>
       <section className="page-content">
-        <div className="heading-row"><div><div className="eyebrow">PEOPLE &amp; CULTURE</div><h1>Employees <span className="title-count">{employees.length}</span></h1><p className="subtitle">A simple overview of everyone on your team.</p></div><div className="heading-actions"><button className="secondary-button feature-button" onClick={exportCsv}>Export CSV</button><button className="secondary-button feature-button" onClick={testSoap}>SOAP demo</button><button className="primary-button" onClick={openCreate}><UserPlus size={17} /> Add employee</button></div></div>
+        <div className="heading-row"><div><div className="eyebrow">PEOPLE &amp; CULTURE</div><h1>Employees <span className="title-count">{employees.length}</span></h1><p className="subtitle">A simple overview of everyone on your team.</p></div><div className="heading-actions"><div className="dropdown-anchor"><button className="secondary-button feature-button" aria-expanded={actionsOpen} onClick={() => setActionsOpen((open) => !open)}>Employee actions <ChevronDown size={14} className={actionsOpen ? 'expanded' : ''} /></button>{actionsOpen && <div className="dropdown-menu"><button onClick={() => { setActionsOpen(false); openCreate(); }}><UserPlus size={15} />Add employee</button><button onClick={() => { setActionsOpen(false); exportCsv(); }}><Download size={15} />Export CSV</button><button onClick={() => { setActionsOpen(false); testSoap(); }}><FileCode2 size={15} />SOAP XML demo</button></div>}</div><button className="primary-button" onClick={openCreate}><UserPlus size={17} /> Add employee</button></div></div>
 
         <div className="stats-row">
           <SummaryCard icon={Users} tone="purple" label="Total employees" value={employees.length} />
@@ -107,13 +120,13 @@ function EmployeeDashboard({ user, onLogout }) {
           <SummaryCard icon={BriefcaseBusiness} tone="orange" label="Roles filled" value={new Set(employees.map((employee) => employee.role.toLowerCase())).size} />
         </div>
 
-        <div className="directory-card">
+        <div className="directory-card" id="employee-directory">
           <div className="directory-heading"><div><h2>All employees</h2><p>Manage your team members and their details.</p></div><span className="updated-note"><span className="status-dot" /> Live directory</span></div>
           <div className="toolbar"><label className="search-box"><Search size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by name, role, or email..." /></label><label className="select-wrap"><select value={department} onChange={(event) => setDepartment(event.target.value)}><option>All departments</option>{departmentsInUse.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={15} /></label></div>
 
           {error && !modalOpen && <div className="error-banner">{error}<button onClick={loadEmployees}>Retry</button></div>}
           <div className="table-wrap"><table><thead><tr><th>EMPLOYEE</th><th>DEPARTMENT</th><th>ROLE</th><th>EMAIL</th><th><span className="sr-only">Actions</span></th></tr></thead><tbody>
-            {loading ? <tr><td colSpan="5" className="empty-state"><div className="spinner" />Loading employees…</td></tr> : visibleEmployees.length ? visibleEmployees.map((employee, index) => <tr key={employee._id}><td><div className="employee-cell"><div className={`employee-avatar ${colors[index % colors.length]}`}>{initials(employee.name)}</div><div><strong>{employee.name}</strong><small>Team member</small></div></div></td><td><span className="department-pill">{employee.department}</span></td><td className="role-cell">{employee.role}</td><td className="email-cell">{employee.email}</td><td><div className="row-actions"><button aria-label={`Edit ${employee.name}`} title="Edit" onClick={() => openEdit(employee)}><Pencil size={15} /></button><button className="delete-action" aria-label={`Delete ${employee.name}`} title="Delete" onClick={() => deleteEmployee(employee)}><Trash2 size={15} /></button></div></td></tr>) : <tr><td colSpan="5" className="empty-state"><div className="empty-icon"><UserRound size={20} /></div><strong>{employees.length ? 'No employees found' : 'Your team starts here'}</strong><span>{employees.length ? 'Try another search or department.' : 'Add your first employee to start building your directory.'}</span>{!employees.length && <button className="text-button" onClick={openCreate}><UserPlus size={15} /> Add your first employee</button>}</td></tr>}
+            {loading ? <tr><td colSpan="5" className="empty-state"><div className="spinner" />Loading employees…</td></tr> : visibleEmployees.length ? visibleEmployees.map((employee, index) => <tr key={employee._id}><td><div className="employee-cell"><div className={`employee-avatar ${colors[index % colors.length]}`}>{initials(employee.name)}</div><div><strong>{employee.name}</strong><small>Team member</small></div></div></td><td><span className="department-pill">{employee.department}</span></td><td className="role-cell">{employee.role}</td><td className="email-cell">{employee.email}</td><td><div className="row-menu-wrap"><button className="row-menu-trigger" aria-label={`Actions for ${employee.name}`} aria-expanded={openRowMenu === employee._id} title="Employee actions" onClick={() => setOpenRowMenu((id) => id === employee._id ? null : employee._id)}><MoreHorizontal size={18} /></button>{openRowMenu === employee._id && <div className="dropdown-menu row-dropdown"><button onClick={() => { setOpenRowMenu(null); openEdit(employee); }}><Pencil size={14} />Edit details</button><button className="danger-menu-item" onClick={() => { setOpenRowMenu(null); deleteEmployee(employee); }}><Trash2 size={14} />Delete employee</button></div>}</div></td></tr>) : <tr><td colSpan="5" className="empty-state"><div className="empty-icon"><UserRound size={20} /></div><strong>{employees.length ? 'No employees found' : 'Your team starts here'}</strong><span>{employees.length ? 'Try another search or department.' : 'Add your first employee to start building your directory.'}</span>{!employees.length && <button className="text-button" onClick={openCreate}><UserPlus size={15} /> Add your first employee</button>}</td></tr>}
           </tbody></table></div>
           <div className="table-footer"><span>Showing <strong>{visibleEmployees.length}</strong> of <strong>{employees.length}</strong> employees</span><span className="footer-mark"><span /> People deserve great tools.</span></div>
         </div>
